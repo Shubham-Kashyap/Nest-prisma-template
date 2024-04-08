@@ -1,0 +1,32 @@
+{
+    // General settings
+    // "files.exclude": {
+    //     "**/.git": true,
+    //     "**/.DS_Store": true,
+    //     "**/node_modules": true,
+    //     "**/dist": true,
+    //     "**/build": true,
+    //     "**/public": true,
+    //     "**/coverage": true
+    // },
+
+    // Git settings
+    "git.enableSmartCommit": true,
+    "git.autofetch": true,
+
+    // eslint
+    "eslint.enable": true,
+
+    "eslint.options": {
+        "overrideConfigFile": "./.eslintrc.js"
+    },
+    "eslint.workingDirectories": [{ "mode": "auto" }],
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": "explicit"
+    },
+
+    // Other settings
+    "breadcrumbs.enabled": true,
+
+    "workbench.colorTheme": "vuesion" // Change this to your preferred theme
+}
