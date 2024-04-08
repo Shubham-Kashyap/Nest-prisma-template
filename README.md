@@ -79,7 +79,7 @@ Once the setup is complete and running, you can simply click on the link to acce
 
 ## Author
 *👤 **Shubham Kashyap <shubhamkashyap3026@gmail.com.com>**
-* Github: [@Shubham Kashyap](https://github.com/Shubham Kashyap)
+* Github: [@Shubham Kashyap](https://github.com/Shubham-Kashyap)
 * Linkdin: [@shubham kashyap](https://in.linkedin.com/in/shubham-kashyap-58a310175)
 
 ## Show your support
