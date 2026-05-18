@@ -29,6 +29,8 @@ model User {
   role            Role              @default(user)
   userToken       String?           @unique @map("user_token")
   reviews         Review[]
+  accessToken     String?           @map("access_token")
+  refreshToken    String?           @map("refresh_token")
   createdAt       DateTime          @default(now()) @map("created_at")
   updatedAt       DateTime          @updatedAt @map("updated_at")
   orders          Order[]
