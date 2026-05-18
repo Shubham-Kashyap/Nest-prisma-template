@@ -6,31 +6,42 @@ import { tap } from 'rxjs/operators';
 export class LoggingInterceptor implements NestInterceptor {
     intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
         const now = Date.now();
-        const host = context.switchToHttp();
-        const req = host.getRequest();
+        const req = context.switchToHttp().getRequest();
         const method = req.method;
         const url = req.url;
+        const className = context.getClass().name;
+        const handlerName = context.getHandler().name;
+        const separator = '\x1b[36m' + '⎯'.repeat(50) + '\x1b[0m';
+        const title = '\x1b[33m' + `📝 Request Details: [${method}] => ${url}:` + '\x1b[0m';
+
         return next.handle().pipe(
             tap({
                 subscribe: () => {
-                    Logger.debug(
-                        ` ${method}  ${req.headers.host}${url}   ${Date.now() - now}ms`,
-                        context.getClass().name
-                    );
-                    console.log({
-                        method: req.method,
-                        url: req.url,
-                        headers: req.headers,
-                        body: req.body,
-                        query: req.query,
-                        params: req.params
-                    });
+                    Logger.debug(`🚀 INCOMING: [${method}] ${url} - ${className}#${handlerName}`, 'LoggingInterceptor');
+
+                    const requestDetails = {
+                        Headers: req.headers,
+                        Query: Object.keys(req.query).length ? req.query : undefined,
+                        Params: Object.keys(req.params).length ? req.params : undefined,
+                        Body: Object.keys(req.body).length ? req.body : undefined
+                    };
+                    console.log(separator);
+                    console.log(title);
+                    console.dir(requestDetails, { depth: null, colors: true });
+                    console.log(separator);
                 },
-                error: (error) =>
+                next: () => {
+                    const duration = Date.now() - now;
+                    Logger.log(`✅ SUCCESS: [${method}] ${url} (+${duration}ms)`, 'LoggingInterceptor');
+                },
+                error: (error) => {
+                    const duration = Date.now() - now;
+                    const statusCode = error.status || 500;
                     Logger.error(
-                        `${method} ${url} ${Date.now() - now}ms ${JSON.stringify(error)}`,
-                        context.getClass().name
-                    )
+                        `❌ ERROR: [${method}] ${url} [${statusCode}] (+${duration}ms) - ${JSON.stringify(error.message || error)}`,
+                        'LoggingInterceptor'
+                    );
+                }
             })
         );
     }

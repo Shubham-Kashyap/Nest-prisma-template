@@ -1,4 +1,4 @@
-import { ResponseInterceptor } from 'src/interceptor/response.interceptor';
+import { ResponseInterceptor } from '@interceptor/response.interceptor';
 import { CanActivate, ExecutionContext, Injectable, UseInterceptors } from '@nestjs/common';
 import { JwtTokenService } from '@services/jwt-token.service';
 import { errorResponse, getcontextData } from '@utilities/response';
@@ -11,10 +11,11 @@ export class AuthGuard implements CanActivate {
     constructor(private jwtTokenService: JwtTokenService) {}
 
     validateToken(request: Request): boolean {
-        const accessToken = request.headers['authorization']?.split(' ')[1] ?? undefined;
+        const accessToken = request.headers['authorization']?.split(' ')[1];
+        if (!accessToken) return false;
         //  TODO  :add user_id  verification logic as well here
         if (this.jwtTokenService.decrypt(accessToken)) return true;
-        else return false;
+        return false;
     }
 
     canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
@@ -23,6 +24,7 @@ export class AuthGuard implements CanActivate {
             return this.validateToken(request);
         } catch (error) {
             errorResponse(error, context);
+            return false;
         }
     }
 }

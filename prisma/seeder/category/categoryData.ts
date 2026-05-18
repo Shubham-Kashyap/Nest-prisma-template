@@ -1,6 +1,4 @@
-import { Prisma } from '@prisma/client';
-
-export const categories: Prisma.CategoryCreateManyInput[] = [
+export const categories = [
     {
         description: 'Mobiles',
         name: 'mobiles'

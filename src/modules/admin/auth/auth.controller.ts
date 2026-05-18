@@ -16,7 +16,7 @@ export default class AuthController {
     constructor(
         private authService: AuthService,
         private jwtTokenService: JwtTokenService
-    ) { }
+    ) {}
 
     /** Login */
     @Post('/login')

@@ -2,8 +2,8 @@ import { MESSAGES } from '@constants/messages';
 import { Controller, Get, Param } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { paginationMetaData } from '@utilities/pagination';
-import Pagination from 'src/decorators/pagination.decorator';
-import ProductFilter from 'src/decorators/product-filter.decorator';
+import Pagination from '@decorators/pagination.decorator';
+import ProductFilter from '@decorators/product-filter.decorator';
 
 import { ProductService } from '../../shared/service/products.service';
 import AuthRole from '@decorators/auth-role.decorator';
@@ -26,7 +26,7 @@ export class ProductController {
         @ProductFilter() filterOptions: ProductFilter,
         @Pagination()
         { limit, offset, page }: PaginationParams
-    ) {
+    ): Promise<ResponsePayload<{ records: Product[]; metaData: PaginationMetaData }>> {
         const { data, count } = await this.productService.getProducts(limit, offset, filterOptions);
         return {
             message: 'Products list',
@@ -44,7 +44,7 @@ export class ProductController {
      * @returns
      */
     @Get('/details/:productId')
-    async productDetails(@Param('productId') productId: string) {
+    async productDetails(@Param('productId') productId: string): Promise<ResponsePayload<Product>> {
         const data = await this.productService.getProductDetails(productId);
         return {
             message: MESSAGES.getProduct.success,

@@ -1,7 +1,7 @@
 import { Controller, Get, Param, ParseIntPipe, Post, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import OrderService from './order.service';
-import AuthRole from 'src/decorators/auth-role.decorator';
+import AuthRole from '@decorators/auth-role.decorator';
 import { Role } from '@constants/enum';
 import { MESSAGES } from '@constants/messages';
 

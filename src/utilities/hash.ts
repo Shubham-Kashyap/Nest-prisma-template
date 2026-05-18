@@ -5,8 +5,8 @@ import * as bcrypt from 'bcrypt';
  * @param {string} text Plain text
  * @returns {string} Encrypted string for password
  */
-export const encryptPassword = (text: string) => {
-    return bcrypt.hashSync(text, parseInt(process.env.BCRYPT_SALT));
+export const encryptPassword = (text: string): string => {
+    return bcrypt.hashSync(text, parseInt(process.env.BCRYPT_SALT || '10', 10));
 };
 
 /**
@@ -15,6 +15,6 @@ export const encryptPassword = (text: string) => {
  * @param {string} encryptedPassword User's encrypted password
  * @returns {Boolean}
  */
-export const comparePasswords = (text: string, encryptedPassword: string) => {
+export const comparePasswords = (text: string, encryptedPassword: string): boolean => {
     return bcrypt.compareSync(text, encryptedPassword);
 };

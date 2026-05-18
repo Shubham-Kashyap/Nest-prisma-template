@@ -7,7 +7,7 @@
             "name": "Debug Nest Framework",
             "args": ["${workspaceFolder}/src/main.ts"],
             "runtimeExecutable": "npm",
-            "runtimeArgs": ["start:dev"],
+            "runtimeArgs": ["run", "debug"],
             "sourceMaps": true,
             "envFile": "${workspaceFolder}/.env",
             "cwd": "${workspaceRoot}",

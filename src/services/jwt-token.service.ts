@@ -15,7 +15,7 @@ export class JwtTokenService {
      * @param payload
      * @returns
      */
-    encrypt(payload): string {
+    encrypt(payload: JwtPayload): string {
         return this.jwtService.sign(payload, { secret: this.configService.get('jwt').secret });
     }
 
@@ -24,7 +24,7 @@ export class JwtTokenService {
      * @param {string} token
      * @returns
      */
-    decrypt(token: string): { userID: number; role: string; isEmailVerified: boolean; iat: number; exp: number } {
+    decrypt(token: string): DecodedJwtPayload {
         try {
             if (!token) throw new UnauthorizedException({ message: MESSAGES.accessControl.exception.invalidToken });
             return this.jwtService.verify(token, { secret: this.configService.get('jwt').secret });
@@ -38,7 +38,7 @@ export class JwtTokenService {
      * @param token
      * @returns
      */
-    decode(token: string) {
+    decode(token: string): { payload: DecodedJwtPayload } | null {
         return this.jwtService.decode(token, { json: true, complete: true });
     }
 }

@@ -3,7 +3,7 @@ import { MESSAGES } from '@constants/messages';
 import UserService from '@modules/shared/service/user.service';
 import { Controller, Get, Param, Patch } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import AuthRole from 'src/decorators/auth-role.decorator';
+import AuthRole from '@decorators/auth-role.decorator';
 
 @Controller('user')
 @ApiTags('User')
@@ -14,7 +14,7 @@ export default class UserController {
     @Get('/list')
     findAll(): ResponsePayload<unknown> {
         return {
-            message: 'success'
+            message: MESSAGES.common.success
         };
     }
 

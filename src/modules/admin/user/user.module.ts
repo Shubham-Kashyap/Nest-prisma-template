@@ -1,7 +1,6 @@
 import JwtAuthModule from '@modules/shared/module/jwt-auth.module';
 import UserService from '@modules/shared/service/user.service';
 import { Module } from '@nestjs/common';
-import { PrismaService } from '@services/prisma.service';
 
 import UserController from './user.controller';
 
@@ -9,6 +8,6 @@ import UserController from './user.controller';
     controllers: [UserController],
     exports: [],
     imports: [JwtAuthModule],
-    providers: [UserService, PrismaService]
+    providers: [UserService]
 })
 export default class UserModule {}
