@@ -1,4 +1,4 @@
-# NestJS + Prisma Backend
+# 🚀 NestJS Enterprise Boilerplate
 
 ![Version](https://img.shields.io/badge/version-0.0.1-blue.svg)
 ![License: UNLICENSED](https://img.shields.io/badge/License-UNLICENSED-yellow.svg)
@@ -12,6 +12,8 @@ A **clean, type‑safe** NestJS backend powered by Prisma (MongoDB). It ships wi
 - **Strict TypeScript** – no `any` in the `src/` folder.
 
 ---
+## ⚡Introduction
+Production-ready NestJS starter template with MongoDB, Prisma, Redis, Swagger, Docker, Jest, i18n, Winston logging, caching, and scalable architecture.
 
 ## ✨ Highlights
 
