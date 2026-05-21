@@ -9,6 +9,7 @@ import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import configuration from './config/dot-env';
+import QueueModule from '@modules/queue/queue.module';
 
 @Module({
     imports: [
@@ -20,7 +21,8 @@ import configuration from './config/dot-env';
         ApplicationDatabaseModule,
         WebModule,
         AdminModule,
-        SystemModule
+        SystemModule,
+        QueueModule
     ],
     controllers: [AppController],
     providers: [AppService]

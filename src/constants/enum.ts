@@ -25,3 +25,18 @@ export enum DeliveryStatus {
     Delivered = 'DELIVERED',
     Failed = 'FAILED'
 }
+
+export enum Priority {
+    Low = 'LOW',
+    Medium = 'MEDIUM',
+    High = 'HIGH',
+    Urgent = 'URGENT'
+}
+
+export enum QueueType {
+    CRITICAL = 'critical',
+    NORMAL = 'normal',
+    BULK = 'bulk',
+    RETRY = 'retry',
+    DLQ = 'dlq',
+}

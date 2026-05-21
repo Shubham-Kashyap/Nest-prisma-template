@@ -13,7 +13,7 @@ A **clean, type‑safe** NestJS backend powered by Prisma (MongoDB). It ships wi
 
 ---
 ## ⚡Introduction
-Production-ready NestJS starter template with MongoDB, Prisma, Redis, Swagger, Docker, Jest, i18n, Winston logging, caching, and scalable architecture.
+Production-ready NestJS starter template with MongoDB, Prisma, Redis, BullMQ, Swagger, Docker, Jest, i18n, Winston logging, caching, and scalable architecture.
 
 ## ✨ Highlights
 
@@ -123,6 +123,15 @@ Descriptions are defined inline in `src/constants/swagger.ts` under `API_PROPERT
 ## 📦 Caching
 - Redis utilities (`src/services/redis.service.ts`, `src/utilities/response.ts`) provide hybrid caching, pagination snapshots, and item‑TTL management.
 - Default TTLs are configurable via environment variables and validated at startup.
+
+---
+
+## 🚀 Queue System & Resiliency (BullMQ)
+- **High-Throughput Queues**: Channel isolation for email, SMS, and push notifications with dedicated execution tiers (Critical, Normal, Bulk, Retry, DLQ).
+- **Provider Failover**: Built-in logic to cascade through fallback providers (e.g., SES -> Sendgrid -> Mailgun) seamlessly.
+- **Circuit Breaker**: Detects provider outages, trips dynamically, and pauses entire queues to apply backpressure and prevent retry floods.
+- **Thundering Herd Mitigation**: Retries implement exponential backoff combined with randomized jitter.
+- **Failure Routing**: Intelligent routing splits transient failures (Retry Queue) from permanent failures (Dead Letter Queue) to prevent queue contamination.
 
 ---
 
