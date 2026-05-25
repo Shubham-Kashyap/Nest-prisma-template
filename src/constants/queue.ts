@@ -30,7 +30,12 @@ export const EMAIL_WORKERS = {
         limiter: { max: 2000, duration: 1000 } // Throttle to 2000 jobs/sec to prevent hitting the Circuit Breaker, duration of 1000 means max 2000 jobs in 1 second
     },
     [QueueType.RETRY]: {
-        concurrency: 5,
+        /**
+         * Concurrency is set to 30 so the single retry queue drains fast.
+         * Jobs are isolated by BullMQ priority (Critical=1, Normal=5, Bulk=10),
+         * so high-priority retries always get processed before low-priority ones.
+         */
+        concurrency: 30,
         queueName: QUEUE_NAMES.EMAIL_RETRY,
     },
     // [QueueType.DLQ]: {

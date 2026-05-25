@@ -4,6 +4,7 @@ import { BullModule } from "@nestjs/bullmq";
 import { Module, OnModuleDestroy } from "@nestjs/common";
 import { EmailProducer } from "./producers/email.producer";
 import { EmailSenderService } from "./services/email-sender.service";
+import { DlqReplayService } from "./services/dlq-replay.service";
 import { shutdownEmailWorkers } from "./workers/email.worker";
 
 
@@ -11,8 +12,8 @@ import { BullBoardModule } from "@bull-board/nestjs";
 import { ExpressAdapter } from "@bull-board/express";
 import { BullMQAdapter } from "@bull-board/api/bullMQAdapter";
 
-const PROVIDERS = [EmailProducer, EmailSenderService];
-const EXPORTS = [EmailProducer];
+const PROVIDERS = [EmailProducer, EmailSenderService, DlqReplayService];
+const EXPORTS = [EmailProducer, DlqReplayService];
 
 // Automatically register every queue defined in our constants
 const DYNAMIC_QUEUES = Object.values(QUEUE_NAMES).map((name) => ({ name }));

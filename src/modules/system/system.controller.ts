@@ -1,11 +1,15 @@
-import { Controller, Post, Get, Query, Logger } from '@nestjs/common';
+import { Controller, Post, Get, Param, Query, Body, Logger } from '@nestjs/common';
 import { EmailProducer } from '@modules/queue/producers/email.producer';
+import { DlqReplayService } from '@modules/queue/services/dlq-replay.service';
 import { QueueType } from '@constants/enum';
 
 @Controller('queue')
 export class SystemController {
     private readonly logger = new Logger(SystemController.name);
-    constructor(private readonly emailProducer: EmailProducer) {}
+    constructor(
+        private readonly emailProducer: EmailProducer,
+        private readonly dlqReplayService: DlqReplayService,
+    ) {}
 
     @Get('status')
     async getQueueStatus() {
@@ -105,5 +109,49 @@ export class SystemController {
         }
 
         this.logger.log(`[SEED COMPLETE] All ${totalJobs} successfully pushed to BullMQ!`);
+    }
+
+    // ─────────────────────────── DLQ Endpoints ───────────────────────────
+
+    /**
+     * List all jobs currently in the Dead Letter Queue with their metadata.
+     * GET /queue/dlq/jobs
+     */
+    @Get('dlq/jobs')
+    async listDlqJobs() {
+        const jobs = await this.dlqReplayService.listJobs();
+        return {
+            success: true,
+            total: jobs.length,
+            data: jobs,
+        };
+    }
+
+    /**
+     * Replay a single DLQ job back to its original queue.
+     * Idempotency lock is bypassed so the job is guaranteed to re-enter.
+     * POST /queue/dlq/replay/:jobId
+     */
+    @Post('dlq/replay/:jobId')
+    async replayDlqJob(@Param('jobId') jobId: string) {
+        this.logger.log(`Manual DLQ replay triggered for jobId=${jobId}`);
+        await this.dlqReplayService.replayJob(jobId);
+        return { success: true, message: `Job ${jobId} replayed to its original queue.` };
+    }
+
+    /**
+     * Replay ALL DLQ jobs, optionally filtered by emailType.
+     * Example: POST /queue/dlq/replay-all?emailType=registration
+     */
+    @Post('dlq/replay-all')
+    async replayAllDlqJobs(@Query('emailType') emailType?: string) {
+        this.logger.log(`DLQ replay-all triggered | filter emailType=${emailType ?? 'all'}`);
+        await this.dlqReplayService.replayAll(emailType);
+        return {
+            success: true,
+            message: emailType
+                ? `All DLQ jobs with emailType="${emailType}" have been replayed.`
+                : 'All DLQ jobs replayed to their original queues.',
+        };
     }
 }

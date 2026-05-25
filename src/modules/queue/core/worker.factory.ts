@@ -1,6 +1,7 @@
 import { Worker, Job, Queue } from 'bullmq';
-import { bullmqConfig } from '@config/bullmq';
 import { Logger } from '@nestjs/common';
+import { bullmqConfig } from '@config/bullmq';
+import { QUEUE_NAMES } from '@constants/queue';
 
 export interface BaseProcessor {
   process(job: Job): Promise<any>;
@@ -28,13 +29,13 @@ export function createChannelWorkers(
   // 1. Initialize core routing queues for this channel
   const retryQueueName = `${channelPrefix}-retry`;
   const dlqQueueName = `${channelPrefix}-dlq`;
-  
+
   const retryQueue = new Queue(retryQueueName, { connection: bullmqConfig.connection });
   const dlqQueue = new Queue(dlqQueueName, { connection: bullmqConfig.connection });
 
   // 2. Map over configs to spin up workers
   const workers = workerConfigs.map(({ queueName, concurrency, limiter }) => {
-    
+
     // Auto-heal stuck paused states from previous crashes
     // const q = new Queue(queueName, { connection: bullmqConfig.connection });
     // q.isPaused().then(paused => {
@@ -79,9 +80,9 @@ export function createChannelWorkers(
       }
 
       const errMessage = error.message.toLowerCase();
-      const isPermanentFailure = 
-        errMessage.includes('invalid') || 
-        errMessage.includes('malformed') || 
+      const isPermanentFailure =
+        errMessage.includes('invalid') ||
+        errMessage.includes('malformed') ||
         errMessage.includes('bounce') ||
         errMessage.includes('permanent');
 
@@ -91,7 +92,7 @@ export function createChannelWorkers(
         logger.warn(`[CIRCUIT BREAKER] Providers degraded for ${queueName}. Pausing for ${pauseDuration / 1000}s.`);
         const currentQueue = new Queue(queueName, { connection: bullmqConfig.connection });
         await currentQueue.pause();
-        
+
         setTimeout(async () => {
           try {
             await currentQueue.resume();
@@ -104,33 +105,40 @@ export function createChannelWorkers(
 
       // Retry/DLQ Routing
       const maxAttempts = 5;
-      const globalAttemptsMade = (job.data.globalAttemptsMade || 0) + 1;
+      const attemptsMade = (job.data.globalAttemptsMade || 0) + 1;
+      const isPermanent = isPermanentFailure;
+      const priorityMap: Record<string, number> = {
+        [QUEUE_NAMES.EMAIL_CRITICAL]: 1,
+        [QUEUE_NAMES.EMAIL_NORMAL]: 5,
+        [QUEUE_NAMES.EMAIL_BULK]: 10,
+      };
+      const priority = priorityMap[queueName] ?? 10;
 
-      if (isPermanentFailure || globalAttemptsMade >= maxAttempts) {
-        logger.log(`[ROUTING TO DLQ] jobId=${job.id} | reason=${isPermanentFailure ? 'Permanent' : 'Max Attempts'}`);
-        await dlqQueue.add(job.name, {
-          ...job.data,
-          globalAttemptsMade,
-          failedReason: errMessage
-        }, {
+      if (isPermanent || attemptsMade >= maxAttempts) {
+        // Route to DLQ with metadata
+        const dlqMetadata = {
+          originalQueue: queueName,
+          errorReason: errMessage,
+          retryable: !isPermanent,
+          createdAt: Date.now(),
+          emailType: job.data.emailType ?? 'default',
+          priority,
+        };
+        await dlqQueue.add(job.name, { ...job.data, globalAttemptsMade: attemptsMade, dlqMetadata }, {
           attempts: 1,
-          removeOnComplete: { age: 600 }, // Keep completed DLQ jobs for 10 minutes
-          removeOnFail: { age: 600 }      // Keep failed DLQ jobs for 10 minutes
+          removeOnComplete: { age: 600 },
+          removeOnFail: { age: 600 },
         });
       } else {
-        // Thundering Herd Jitter
-        const remainingAttempts = maxAttempts - globalAttemptsMade;
-        logger.log(`[ROUTING TO RETRY] jobId=${job.id} | attempt=${globalAttemptsMade}/${maxAttempts} | retries remaining=${remainingAttempts}`);
-        const baseDelay = 1000 * Math.pow(2, globalAttemptsMade);
-        const jitter = Math.floor(Math.random() * 500);
-
-        await retryQueue.add(job.name, {
-          ...job.data,
-          globalAttemptsMade,
-          failedReason: errMessage
-        }, {
+        // Route back to retry queue with exponential backoff + jitter, preserving original priority
+        const baseDelay = Math.min(30000, 1000 * Math.pow(2, attemptsMade));
+        const jitter = Math.floor(Math.random() * 1000);
+        const remainingAttempts = maxAttempts - attemptsMade;
+        logger.log(`[ROUTING TO RETRY] jobId=${job.id} | attempt=${attemptsMade}/${maxAttempts} | remaining=${remainingAttempts} | delay=${baseDelay + jitter}ms`);
+        await retryQueue.add(job.name, { ...job.data, globalAttemptsMade: attemptsMade }, {
           attempts: 1,
           delay: baseDelay + jitter,
+          priority,  // Preserve original queue priority so critical jobs are processed first in the retry queue
         });
       }
     });
