@@ -21,7 +21,7 @@ describe('Environment Config', () => {
             REDIS_ITEM_TTL: '600',
             REDIS_PAGE_TTL: '90',
             DEFAULT_LANGUAGE: 'en',
-            SUPPORTED_LANGUAGES: 'en, hi',
+            // SUPPORTED_LANGUAGES: 'en, hi',
             JWT_VALIDITY: '60m',
             JWT_SECRET: 'secret',
             JWT_ALGORITHM: 'HS256'
