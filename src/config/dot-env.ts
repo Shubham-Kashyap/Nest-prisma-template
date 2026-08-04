@@ -30,7 +30,7 @@ export default () => {
         },
         i18n: {
             defaultLanguage: getEnv('DEFAULT_LANGUAGE', missingVars),
-            supportedLanguages: getEnv('SUPPORTED_LANGUAGES', missingVars).split(',').map((language) => language.trim())
+            // supportedLanguages: getEnv('SUPPORTED_LANGUAGES', missingVars).split(',').map((language) => language.trim())
         },
         jwt: {
             validity: getEnv('JWT_VALIDITY', missingVars),
