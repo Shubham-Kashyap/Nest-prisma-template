@@ -15,7 +15,13 @@ export class RoleGuard implements CanActivate {
     canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
         try {
             const { request } = getcontextData(context);
-            const { payload } = this.jwtTokenService.decode(request.headers['authorization']?.split(' ')[1]);
+            const token = request.headers['authorization']?.split(' ')[1];
+            if (!token) return false;
+
+            const decoded = this.jwtTokenService.decode(token);
+            if (!decoded || !decoded.payload) return false;
+            const { payload } = decoded;
+
             const requiredRoles = this.reflector.getAllAndOverride<Role[]>('roles', [
                 context.getHandler(),
                 context.getClass()
@@ -23,9 +29,10 @@ export class RoleGuard implements CanActivate {
             // TODO :  add or modify role based access control here
             /** Role Based Access Control (RBAC) */
             if (!requiredRoles || requiredRoles.some((role) => [payload['role']].includes(role))) return true;
-            else return false;
+            return false;
         } catch (error) {
             errorResponse(error, context);
+            return false;
         }
     }
 }

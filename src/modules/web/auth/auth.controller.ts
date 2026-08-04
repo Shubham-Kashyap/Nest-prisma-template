@@ -9,14 +9,13 @@ import { Body, Controller, Post, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { JwtTokenService } from '@services/jwt-token.service';
 
-
 @Controller('/auth')
 @ApiTags('Auth')
 export default class AuthController {
     constructor(
         private authService: AuthService,
         private jwtTokenService: JwtTokenService
-    ) { }
+    ) {}
 
     /** Signup  */
     /** TODO : add transction  */

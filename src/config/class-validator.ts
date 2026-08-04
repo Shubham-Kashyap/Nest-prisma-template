@@ -1,12 +1,12 @@
 import { BadRequestException, INestApplication, ValidationPipe } from '@nestjs/common';
 import { useContainer } from 'class-validator';
-import { AppModule } from 'src/app.module';
+import { AppModule } from '../app.module';
 
 /**
  * Class-validator Configuration
  * @param app
  */
-export default (app: INestApplication<any>) => {
+export default (app: INestApplication) => {
     app.useGlobalPipes(
         new ValidationPipe({
             whitelist: true,
@@ -14,18 +14,19 @@ export default (app: INestApplication<any>) => {
             disableErrorMessages: true,
             stopAtFirstError: true,
             exceptionFactory: (errors) => {
-                const errorDetails = errors.reduce(
-                    (acc, error) => ({
-                        ...acc,
-                        cause: error.value,
-                        property: error.property,
-                        message: error.constraints[Object.keys(error.constraints)[0]],
-                        description: '',
-                        error
-                    }),
-                    {}
-                );
-                return new BadRequestException({ message: errorDetails['message'], ...errorDetails });
+                const error = errors[0];
+                const constraints = error.constraints || {};
+                const firstConstraintKey = Object.keys(constraints)[0];
+                const message = firstConstraintKey ? constraints[firstConstraintKey] : 'Validation failed';
+
+                const errorDetails = {
+                    cause: error.value,
+                    property: error.property,
+                    message: message,
+                    description: '',
+                    error
+                };
+                return new BadRequestException(errorDetails);
             }
         })
     );

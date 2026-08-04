@@ -1,8 +1,8 @@
 import { Role } from '@constants/enum';
 import { MESSAGES } from '@constants/messages';
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Put } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Put } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import AuthRole from 'src/decorators/auth-role.decorator';
+import AuthRole from '@decorators/auth-role.decorator';
 
 import { ProductService } from '../../shared/service/products.service';
 import { EditProductDto } from './dto/editProduct.dto';
@@ -33,7 +33,7 @@ export class ProductController {
      * @returns
      */
     @Put('/edit/:productId')
-    async editProduct(@Param('productId', ParseIntPipe) productId: string, @Body() data: EditProductDto) {
+    async editProduct(@Param('productId') productId: string, @Body() data: EditProductDto) {
         await this.productService.updateProduct(productId, data);
         return {
             message: MESSAGES.editProduct.success

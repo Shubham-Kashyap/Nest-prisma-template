@@ -1,6 +1,6 @@
 import { Role } from '@constants/enum';
 import { MESSAGES } from '@constants/messages';
-import AuthRole from 'src/decorators/auth-role.decorator';
+import AuthRole from '@decorators/auth-role.decorator';
 import { Controller, Get, Param } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import UserService from '../../shared/service/user.service';
@@ -14,7 +14,7 @@ export default class UserController {
     @AuthRole(Role.Admin)
     findAll(): ResponsePayload<unknown> {
         return {
-            message: 'success'
+            message: MESSAGES.common.success
         };
     }
 

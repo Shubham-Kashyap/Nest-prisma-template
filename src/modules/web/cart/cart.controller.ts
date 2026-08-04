@@ -1,6 +1,6 @@
 import { Role } from '@constants/enum';
 import { MESSAGES } from '@constants/messages';
-import AuthRole from 'src/decorators/auth-role.decorator';
+import AuthRole from '@decorators/auth-role.decorator';
 import { Controller, Delete, ParseIntPipe, Post, Put, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 

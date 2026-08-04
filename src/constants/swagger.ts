@@ -1,7 +1,6 @@
 import { productFieldDescription, userFieldDescription } from '@helpers/swagger.helper';
 
 import { Role } from './enum';
-
 export const API_PROPERTIES = {
     signup: {
         firstName: userFieldDescription('First name'),

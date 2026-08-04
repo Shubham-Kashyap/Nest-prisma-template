@@ -7,10 +7,6 @@ export default async () => {
     const categoryCount = await prisma.category.count();
 
     if (categoryCount === 0) {
-        const categoryCreationPromises = categories.map((category) => {
-            return prisma.category.create({ data: category });
-        });
-
-        await Promise.all(categoryCreationPromises);
+        await Promise.all(categories.map((category) => prisma.category.create({ data: category })));
     }
 };

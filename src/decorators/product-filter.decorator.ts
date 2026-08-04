@@ -29,12 +29,13 @@ export default createParamDecorator(
         };
     },
     [
-        (target, key) => {
+        (target: Record<string | symbol, object>, key?: string | symbol) => {
+            if (!key) return;
             // Here we will define query parameter for swagger documentation
             Reflect.defineMetadata(
                 DECORATORS.API_PARAMETERS,
                 [
-                    ...(Reflect.getMetadata(DECORATORS.API_PARAMETERS, target[key]) ?? []),
+                    ...(Reflect.getMetadata(DECORATORS.API_PARAMETERS, target[key as keyof typeof target]) ?? []),
                     {
                         name: 'category',
                         required: false,
@@ -68,7 +69,7 @@ export default createParamDecorator(
                         description: API_PROPERTIES.product.filters.rating
                     }
                 ],
-                target[key]
+                target[key as keyof typeof target]
             );
         }
     ]
