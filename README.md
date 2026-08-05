@@ -72,8 +72,8 @@ src/
 
 ```bash
 # Clone the repository
-git clone https://your-repo-url.git
-cd nest-with-mongodb
+git clone https://github.com/Shubham-Kashyap/Nest-prisma-template.git <your-folder-name>
+cd <your-folder-name>
 
 # Install dependencies
 npm install
@@ -97,7 +97,7 @@ npm run test:cov      # Unit tests with coverage report
 ---
 
 ## 📚 Swagger Documentation
-Two separate Swagger UIs are provided:
+Separate Swagger UIs are provided:
 - **Admin** – `http://localhost:5000/api/doc/admin/`
 - **Web**   – `http://localhost:5000/api/doc/web/`
 - **System** – `http://localhost:5000/api/doc/system/`
