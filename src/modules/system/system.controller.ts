@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Param, Query, Body, Logger } from '@nestjs/common';
+import { Controller, Post, Get, Param, Query, Logger } from '@nestjs/common';
 import { EmailProducer } from '@modules/queue/producers/email.producer';
 import { DlqReplayService } from '@modules/queue/services/dlq-replay.service';
 import { QueueType } from '@constants/enum';

@@ -1,9 +1,10 @@
+import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { Logger } from '@nestjs/common';
-import envConfig from '../dot-env';
+import envConfig from '../config/dot-env';
 
 describe('Environment Config', () => {
     let originalEnv: NodeJS.ProcessEnv;
-    let exitSpy: jest.SpyInstance;
+    let exitSpy: ReturnType<typeof jest.spyOn>;
 
     beforeEach(() => {
         originalEnv = { ...process.env };

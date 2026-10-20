@@ -5,6 +5,10 @@
   "author": "Shubham Kashyap",
   "private": true,
   "license": "UNLICENSED",
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=9.0.0"
+  },
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
@@ -83,7 +87,7 @@
       "ts"
     ],
     "rootDir": "src",
-    "testRegex": ".*/__test__/.*\\.test\\.ts$",
+    "testRegex": ".*/__tests__/.*\\.test\\.ts$",
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
     },

@@ -23,7 +23,7 @@ export function createChannelWorkers(
   workerConfigs: WorkerConfig[],
   options?: { circuitBreakerDurationMs?: number }
 ) {
-  console.log('workerConfigs', workerConfigs);
+  // console.log('workerConfigs', workerConfigs);
   const logger = new Logger(`${channelPrefix.toUpperCase()}_WORKER_FACTORY`);
 
   // 1. Initialize core routing queues for this channel

@@ -3,7 +3,6 @@ import { BullRootModuleOptions } from "@nestjs/bullmq";
 export const bullmqConfig: BullRootModuleOptions = {
     connection: {
        url: process.env.REDIS_URL,
-       port: Number(process.env.REDIS_PORT),
     },
     defaultJobOptions: {
         attempts: 1, // Disabled internal retries to enforce retry queue isolation
