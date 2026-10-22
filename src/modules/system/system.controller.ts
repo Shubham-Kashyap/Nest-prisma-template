@@ -49,6 +49,7 @@ export class SystemController {
         // Fire and forget the background seeder so the HTTP Request returns instantly.
         // It prevents the API from timing out during 1M loop generations.
         this.seedMassiveLoad(totalJobs).catch((err) => {
+            console.log('Background Seed Failed', err);
             this.logger.error('Background Seed Failed', err);
         });
 
