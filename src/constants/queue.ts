@@ -1,5 +1,7 @@
 import { QueueType } from "./enum";
 
+export const REDIS_BACKPRESSURE_LIMIT = 50000; // If Redis has more than 50,000 pending jobs, we pause the seeder to prevent OOM errors
+
 export const QUEUE_NAMES = {
   EMAIL_CRITICAL: 'email-critical',
   EMAIL_NORMAL: 'email-normal',
@@ -7,10 +9,6 @@ export const QUEUE_NAMES = {
   EMAIL_RETRY: 'email-retry',
   EMAIL_DLQ: 'email-dlq',
 } as const;
-
-
-
-
 
 
 export const EMAIL_WORKERS = {
@@ -43,3 +41,11 @@ export const EMAIL_WORKERS = {
     //     queueName: QUEUE_NAMES.EMAIL_DLQ,
     // }
 }
+
+export const  TTL_MAP: Record<string, number> = { 
+    otp: 60, 
+    registration: 600, 
+    bulk: 86400, 
+    marketing: 86400, 
+    default: 300 
+};
