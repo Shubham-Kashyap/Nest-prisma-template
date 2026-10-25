@@ -2,6 +2,7 @@ import { Controller, Post, Get, Param, Query, Logger } from '@nestjs/common';
 import { EmailProducer } from '@modules/queue/producers/email.producer';
 import { DlqReplayService } from '@modules/queue/services/dlq-replay.service';
 import { QueueType } from '@constants/enum';
+import { REDIS_BACKPRESSURE_LIMIT } from '@constants/queue';
 
 @Controller('queue')
 export class SystemController {
@@ -49,7 +50,8 @@ export class SystemController {
         // Fire and forget the background seeder so the HTTP Request returns instantly.
         // It prevents the API from timing out during 1M loop generations.
         this.seedMassiveLoad(totalJobs).catch((err) => {
-            this.logger.error('Background Seed Failed', err);
+            console.error('Background Seed Failed', err);
+            this.logger.error(`Background Seed Failed: ${err?.message || err}`, err?.stack);
         });
 
         return {
@@ -60,20 +62,22 @@ export class SystemController {
 
     private async seedMassiveLoad(totalJobs: number) {
         const BATCH_SIZE = 10000;
-        const REDIS_BACKPRESSURE_LIMIT = 50000; // Max allowed waiting jobs before pausing
+        const runId = Date.now();
 
-        this.logger.log(`[SEED START] Seeding ${totalJobs} jobs...`);
+        this.logger.log(`[SEED START] Seeding ${totalJobs} jobs (runId=${runId})...`);
 
         for (let batchStart = 0; batchStart < totalJobs; batchStart += BATCH_SIZE) {
             
             // 1. SMART BACKPRESSURE CONTROL
-            // If Redis is already choked with 50,000 pending bulk jobs, we WAIT.
-            // This guarantees we never OOM Redis even if we queue 100,000,000 jobs!
-            let waitingCount = await this.emailProducer.getWaitingCount(QueueType.BULK);
-            while (waitingCount > REDIS_BACKPRESSURE_LIMIT) {
-                this.logger.warn(`[BACKPRESSURE] Queue has ${waitingCount} jobs. Pausing seeder for 2 seconds to let workers drain...`);
+            // If Redis is already choked with 50,000 pending bulk or normal jobs, we WAIT.
+            // This guarantees we never ran OOM Redis even if we queue 100,000,000 jobs!
+            let waitingBulk = await this.emailProducer.getWaitingCount(QueueType.BULK);
+            let waitingNormal = await this.emailProducer.getWaitingCount(QueueType.NORMAL);
+            while (waitingBulk > REDIS_BACKPRESSURE_LIMIT || waitingNormal > REDIS_BACKPRESSURE_LIMIT) {
+                this.logger.warn(`[BACKPRESSURE] High queue load (Bulk: ${waitingBulk}, Normal: ${waitingNormal}). Pausing seeder for 2 seconds to let workers drain...`);
                 await new Promise((res) => setTimeout(res, 2000));
-                waitingCount = await this.emailProducer.getWaitingCount(QueueType.BULK);
+                waitingBulk = await this.emailProducer.getWaitingCount(QueueType.BULK);
+                waitingNormal = await this.emailProducer.getWaitingCount(QueueType.NORMAL);
             }
 
             // 2. ULTRA-FAST ARRAY GENERATION
@@ -85,19 +89,24 @@ export class SystemController {
 
             for (let i = 1; i <= currentBatchSize; i++) {
                 const globalIndex = batchStart + i;
+                const isCritical = globalIndex % 10 === 0;
+                const isBulk = !isCritical && globalIndex % 2 === 0;
+                const emailType = isCritical ? 'otp' : isBulk ? 'bulk' : 'default';
+
                 const payload = {
                     data: {
-                        to: `user_${globalIndex}@example.com`,
+                        to: `user_${runId}_${globalIndex}@example.com`,
                         subject: `Massive Load Test ${globalIndex}`,
                         body: `Payload #${globalIndex}`,
-                        metadata: { campaignId: 'million_send_test' }
+                        emailType,
+                        metadata: { campaignId: 'million_send_test', runId }
                     },
-                    options: { jobId: `load_test_${globalIndex}` }
+                    options: { jobId: `load_test_${runId}_${globalIndex}`, idempotencyTTL: 300 }
                 };
 
-                if (globalIndex % 10 === 0) criticalJobs.push(payload); // 10% Critical
-                else if (globalIndex % 2 === 0) bulkJobs.push(payload); // 45% Bulk
-                else normalJobs.push(payload); // 45% Normal
+                if (isCritical) criticalJobs.push(payload); // 10% Critical
+                else if (isBulk) bulkJobs.push(payload);     // 45% Bulk
+                else normalJobs.push(payload);             // 45% Normal
             }
 
             // 3. FLUSH VIA REDIS PIPELINES

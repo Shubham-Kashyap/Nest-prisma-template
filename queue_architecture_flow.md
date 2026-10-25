@@ -11,7 +11,7 @@ The diagram below outlines the system design, detailing how incoming requests ar
 ```mermaid
 graph TD
     %% 1. INGESTION
-    Client[Client / Load Test Trigger] -->|POST /queue/load-test| Controller[SystemController]
+    Client[Client / Load Test Trigger] -->|POST or GET /api/v1/system/queue/load-test| Controller[SystemController]
     Controller -->|Async Background Loop| Seeder[Massive Load Seeder]
     
     subgraph Backpressure_Ingestion [Ingestion & Backpressure Control]

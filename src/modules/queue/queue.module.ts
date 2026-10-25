@@ -23,7 +23,7 @@ const DYNAMIC_QUEUES = Object.values(QUEUE_NAMES).map((name) => ({ name }));
         BullModule.forRoot(bullmqConfig),
         BullModule.registerQueue(...DYNAMIC_QUEUES),
         BullBoardModule.forRoot({
-            route: '/queues',
+            route: '/queues-bull-board',
             adapter: ExpressAdapter,
         }),
         ...DYNAMIC_QUEUES.map((q) =>
