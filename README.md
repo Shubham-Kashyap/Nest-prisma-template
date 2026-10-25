@@ -1,7 +1,7 @@
 # 🚀 NestJS Enterprise Boilerplate
 
 ![Version](https://img.shields.io/badge/version-0.0.1-blue.svg)
-![License: UNLICENSED](https://img.shields.io/badge/License-UNLICENSED-yellow.svg)
+![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 
 A **clean, type‑safe** NestJS backend powered by Prisma (MongoDB). It ships with:
 - **Global response interceptor** for uniform API responses.
