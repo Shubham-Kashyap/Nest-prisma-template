@@ -2,32 +2,49 @@
 
 services:
   mongodb:
-    image: mongo:latest
+    image: mongo:7.0
     container_name: nest_mongodb
+    restart: always
+    command: ["--replSet", "rs0", "--bind_ip_all"]
     ports:
-      - "${MONGODB_PORT:-27017}:${MONGODB_PORT:-27017}"
+      - "${MONGODB_PORT:-27017}:27017"
     volumes:
       - mongo_data:/data/db
+    healthcheck:
+      test: mongosh --port 27017 --eval "try { rs.status().ok } catch (e) { rs.initiate({_id:'rs0',members:[{_id:0,host:'127.0.0.1:27017'}]}).ok }" --quiet
+      interval: 3s
+      timeout: 5s
+      start_period: 2s
+      retries: 5
 
   redis:
     image: redis:latest
     container_name: nest_redis
+    restart: always
     ports:
-      - "${REDIS_PORT:-6379}:${REDIS_PORT:-6379}"
+      - "${REDIS_PORT:-6379}:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 3s
+      timeout: 3s
+      retries: 5
 
   app:
     build: .
     container_name: nest_app
     ports:
-      - "${PORT:-5000}:${PORT:-5000}"
+      - "${PORT:-5000}:5000"
     env_file:
       - .env
     environment:
-      - MONGODB_URL=mongodb://mongodb:${MONGODB_PORT:-27017}/$MONGODB_DB_NAME
-      - REDIS_URL=redis://redis:${REDIS_PORT:-6379}
+      - MONGODB_URL=mongodb://mongodb:27017/${MONGODB_DB_NAME:-nest-boilerplate}?directConnection=true
+      - REDIS_URL=redis://redis:6379
     depends_on:
-      - mongodb
-      - redis
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
 volumes:
   mongo_data:
+
