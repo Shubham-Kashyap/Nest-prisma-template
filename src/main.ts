@@ -19,6 +19,7 @@ import { logger } from './config/logger';
 async function bootstrap() {
     const app = await NestFactory.create(AppModule, { logger });
     const configService = app.get(ConfigService);
+    const port = configService.get<number>('port') || 5000;
 
     /** Global request route prefix  */
     app.setGlobalPrefix('api');
@@ -44,7 +45,9 @@ async function bootstrap() {
     /** Enable CORS */
     app.enableCors();
 
-    const port = configService.get<number>('port') || 5000;
+    /** Enable Shutdown Hooks : also calls when an application is shutting down or receives the termination signal */
+    app.enableShutdownHooks();
+
     await app.listen(port);
     Logger.log(`Application is running on: ${await app.getUrl()}`, 'Bootstrap');
 }
