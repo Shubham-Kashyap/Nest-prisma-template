@@ -12,6 +12,7 @@ import { LoggingInterceptor } from './interceptor/logging.interceptor';
 import { ResponseInterceptor } from './interceptor/response.interceptor';
 
 import { logger } from './config/logger';
+import { AppClusterService } from '@services/app-cluster.service';
 
 /**
  * Bootstrap Application
@@ -51,4 +52,7 @@ async function bootstrap() {
     await app.listen(port);
     Logger.log(`Application is running on: ${await app.getUrl()}`, 'Bootstrap');
 }
-bootstrap();
+
+AppClusterService.InitializeCluster(bootstrap);
+// bootstrap();
+    
